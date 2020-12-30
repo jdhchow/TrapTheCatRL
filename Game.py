@@ -1,4 +1,5 @@
 import random
+import copy
 
 
 '''
@@ -8,6 +9,7 @@ Python Version: 3.7
 
 Class for the game
 '''
+
 
 class Grid:
     def __init__(self, yLen, xLen, grid=None, catLoc=None):
@@ -24,7 +26,9 @@ class Grid:
 
     def createWall(self, index):
         col, row = self.index2tuple(index)
-        self.grid[col][row] = 1
+        newGrid = copy.deepcopy(self.grid)
+        newGrid[col][row] = 1
+        return newGrid
 
     def checkCollision(self, index):
         col, row = self.index2tuple(index)
@@ -49,9 +53,14 @@ class Grid:
         return [moveTuple for moveTuple in potentialMoves if self.grid[moveTuple[0]][moveTuple[1]] != 1]
 
     def updateCatLoc(self, move):
-        self.grid[self.catLoc[0]][self.catLoc[1]] = 0
-        self.grid[move[0]][move[1]] = 2
-        self.catLoc = move
+        newGrid = copy.deepcopy(self.grid)
+        newCatLoc = copy.deepcopy(self.catLoc)
+
+        newGrid[newCatLoc[0]][newCatLoc[1]] = 0
+        newGrid[move[0]][move[1]] = 2
+        newCatLoc = move
+
+        return newGrid, newCatLoc
 
     def newGrid(self, pFill):
         # Generate initial grid
@@ -62,7 +71,7 @@ class Grid:
         fillIndices = random.sample(population=range(self.totalTiles), k=nFill)
 
         for index in fillIndices:
-            self.createWall(index)
+            self.grid = self.createWall(index)
 
         # Place cat
         self.catLoc = (self.yLen // 2, self.xLen // 2)
@@ -75,9 +84,10 @@ class Grid:
             print(offset + ' '.join([str(tile) for tile in self.grid[col]]))
 
     def isWinningCatPosition(self, pos):
-        # Check if cat can move off the grid (y-axis)
-        return not {0, self.yLen-1}.isdisjoint([pos[0]]) or \
-                not {0, self.xLen-1}.isdisjoint([pos[1]])
+        # Check if cat is on edge of grid
+        return not {0, self.yLen - 1}.isdisjoint([pos[0]]) or \
+               not {0, self.xLen - 1}.isdisjoint([pos[1]])
+
 
 class Game:
     def __init__(self, gridDim):
@@ -96,7 +106,8 @@ class Game:
     def checkPlayerWin(self):
         # Check player win (cat has no moves left)
         validMoves = self.grid.getValidCatMoves()
-        if not self.grid.getValidCatMoves():
+
+        if not validMoves:
             self.winner = 0
 
         return self.winner == 0
@@ -115,7 +126,7 @@ class Game:
         self.turn += 1
 
         # Process player move
-        self.grid.createWall(index)
+        self.grid.grid = self.grid.createWall(index)
 
     def moveCat(self, move):
         # Get valid cat moves (potential moves less blocked tiles)
@@ -125,4 +136,4 @@ class Game:
         assert move in validMoves
 
         # Update grid and cat location
-        self.grid.updateCatLoc(move)
+        self.grid.grid, self.grid.catLoc = self.grid.updateCatLoc(move)

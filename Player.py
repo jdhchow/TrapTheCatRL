@@ -1,11 +1,7 @@
 import numpy as np
 import random
-import copy
 from tensorflow import keras
 from tensorflow.keras import layers, models
-
-from Game import Grid  # Player can access grid.createWall(index) and grid.getValidPlayerMoves()
-
 
 '''
 Author: Jonathan Chow
@@ -13,6 +9,10 @@ Date Created: 2020-12-29
 Python Version: 3.7
 
 Class for the RL player
+
+From Grid, player can access:
+grid.createWall(index)
+grid.getValidPlayerMoves()
 '''
 
 
@@ -52,9 +52,8 @@ class Player:
         actions = []
 
         for state, action in zip(self.prevStates, self.prevActions):
-            grid = Grid(*self.gridDim, copy.deepcopy(state))  # Do not need to provide catLoc for our purpose
-            grid.createWall(action)
-            actions += [np.array(grid.grid) / 2]   # Standardize grid for neural network
+            newGrid = state.createWall(action)
+            actions += [np.array(newGrid) / 2]   # Standardize grid for neural network
 
         actions = np.array(actions)
         actions = actions.reshape(actions.shape + (1,))
@@ -89,14 +88,12 @@ class Player:
     def explore(self, actions):
         return random.choice(actions)
 
-    def optimize(self, state, actions):
+    def optimize(self, grid, actions):
         actionValues = []
 
         for action in actions:
-            nextGrid = Grid(*self.gridDim, copy.deepcopy(state))
-            nextGrid.createWall(action)
-
-            newGrid = np.array(nextGrid.grid) / 2  # Standardize grid for neural network
+            newGrid = grid.createWall(action)
+            newGrid = np.array(newGrid) / 2  # Standardize grid for neural network
             newGrid = newGrid.reshape(newGrid.shape + (1,))
 
             actionValues += [(action, self.valueFunc.predict(np.array([newGrid])))]
@@ -106,15 +103,14 @@ class Player:
 
         return self.explore(optActions)
 
-    def move(self, state):
-        grid = Grid(*self.gridDim, state)
+    def move(self, grid):
         actions = grid.getValidPlayerMoves()
 
         # Update epsilon
         self.updateEpsilon()
-        action = self.explore(actions) if random.random() < self.epsilon else self.optimize(state, actions)
+        action = self.explore(actions) if random.random() < self.epsilon else self.optimize(grid, actions)
 
-        self.prevStates += [state]
+        self.prevStates += [grid]
         self.prevActions += [action]
 
         return action

@@ -1,7 +1,5 @@
 import random
 
-from Game import Grid  # Cat can access grid.updateCatLoc(move) and grid.getValidCatMoves()
-
 
 '''
 Author: Jonathan Chow
@@ -9,7 +7,14 @@ Date Created: 2020-12-29
 Python Version: 3.7
 
 Class for the cat
+
+From Grid, cat can access:
+grid.updateCatLoc(move)
+grid.getPotentialCatMoves()
+grid.getValidCatMoves()
+grid.isWinningCatPosition(position)
 '''
+
 
 class Cat:
     def __init__(self):
@@ -25,8 +30,9 @@ class Cat:
     def updateValueFunc(self, terminalReward):
         raise NotImplementedError
 
-    def move(self, state, catLoc):
+    def move(self, grid):
         raise NotImplementedError
+
 
 class RandomCat(Cat):
     def __init__(self):
@@ -38,12 +44,12 @@ class RandomCat(Cat):
     def updateValueFunc(self, terminalReward):
         pass
 
-    def move(self, state, catLoc):
-        grid = Grid(*self.gridDim, state, catLoc)
+    def move(self, grid):
         validMoves = grid.getValidCatMoves()   # Gives the coordinates of valid adjacent squares
 
         move = random.choice(validMoves)
         return move
+
 
 def get_dist(grid, pos):
     q = [(pos, 0)]
@@ -60,6 +66,7 @@ def get_dist(grid, pos):
     # We can't reach the edge anymore :(
     return 10000
 
+
 class ShortestPathCat(Cat):
     def __init__(self):
         super().__init__()
@@ -70,6 +77,5 @@ class ShortestPathCat(Cat):
     def updateValueFunc(self, terminalReward):
         pass
 
-    def move(self, state, catLoc):
-        grid = Grid(*self.gridDim, state, catLoc)
+    def move(self, grid):
         return sorted([(get_dist(grid, x), x) for x in grid.getValidCatMoves()])[0][1]

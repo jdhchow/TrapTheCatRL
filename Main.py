@@ -1,6 +1,6 @@
 import datetime
-import random
 import copy
+
 from Game import Game
 from Player import Player
 from Cat import RandomCat
@@ -12,12 +12,11 @@ Date Created: 2020-12-29
 Python Version: 3.7
 
 A reinforcement learning algorithm to play Trap the Cat
-
-To Do:
-    -Options for higher dimensions, multiple cats, and/or multiple players
 '''
 
+
 def saveFiles(player, playerModelPath, cat, catModelPath):
+    # Save model files if non-determinist strategy being used
     if player.valueFunc is not None:
         player.valueFunc.save(playerModelPath)
 
@@ -42,13 +41,11 @@ if __name__ == '__main__':
     cat = RandomCat()
 
     # Build player and cat models (add playerModelPath to parameters to use existing model)
-    player.newTask(gridDim, playerModelPath)
+    player.newTask(gridDim)
     cat.newTask(gridDim)
 
     # Run simulations
     for i in range(1, simulations + 1):
-        initialPercentFill = 0.6
-
         # Create new game
         game.newGame(initialPercentFill)
 
@@ -61,12 +58,12 @@ if __name__ == '__main__':
 
         # Process turns
         while True:
-            gridIndex = player.move(copy.deepcopy(game.grid.grid))
+            gridIndex = player.move(copy.deepcopy(game.grid))
             game.movePlayer(gridIndex)
 
             if game.checkPlayerWin(): break
 
-            direction = cat.move(copy.deepcopy(game.grid.grid), copy.deepcopy(game.grid.catLoc))
+            direction = cat.move(copy.deepcopy(game.grid))
             game.moveCat(direction)
 
             if game.checkCatWin(): break
@@ -80,10 +77,6 @@ if __name__ == '__main__':
 
         # Display summary (0: Player win, 1: Cat win)
         print('Game ' + str(i) + ' winner is ' + str(game.winner) + ' in ' + str(game.turn) + ' turns')
-
-        # Save the files every so often so that we don't lose progress if we have to quit early
-        if i % 10 == 9:
-            saveFiles(player, playerModelPath, cat, catModelPath)
 
     # Output simulation summary
     print('Player win rate: ' + str(float(playerWins) / simulations))
