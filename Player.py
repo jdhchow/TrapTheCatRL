@@ -4,6 +4,8 @@ import copy
 from tensorflow import keras
 from tensorflow.keras import layers, models
 
+from Game import Grid  # Player can access grid.createWall(index) and grid.getValidPlayerMoves()
+
 
 '''
 Author: Jonathan Chow
@@ -19,11 +21,13 @@ class Player:
         self.epsilon = 0.2
         self.epsilonStepSize = 0.001
         self.gamma = 0.8
-        self.gridDim = None
 
+        # Set for each task
+        self.gridDim = None
         self.valueFunc = None
         self.actions = None
 
+        # Set for each game
         self.prevStates = None
         self.prevActions = None
 
@@ -38,19 +42,21 @@ class Player:
         else:
             self.valueFunc = keras.models.load_model(valueFuncPath)
 
-        self.actions = list(range(np.prod(gridDim)))
-
-        self.prevStates = []
-        self.prevActions = []
-
-    def newEpoch(self):
+    def newGame(self):
         self.prevActions = []
         self.prevStates = []
 
     def updateValueFunc(self, terminalReward):
         steps = len(self.prevStates)
         discountedRewards = np.array([(self.gamma ** (steps - x)) * terminalReward for x in range(steps)])
-        actions = np.array([self.createWall(state, action) for state, action in zip(self.prevStates, self.prevActions)])
+        actions = []
+
+        for state, action in zip(self.prevStates, self.prevActions):
+            grid = Grid(*self.gridDim, copy.deepcopy(state))  # Do not need to provide catLoc for our purpose
+            grid.createWall(action)
+            actions += [np.array(grid.grid) / 2]   # Standardize grid for neural network
+
+        actions = np.array(actions)
         actions = actions.reshape(actions.shape + (1,))
 
         self.valueFunc.train_on_batch(actions, discountedRewards)
@@ -80,54 +86,35 @@ class Player:
 
         return model
 
-    # Player knows the consequences of their actions
-    def createWall(self, grid, index):
-        col = index // self.gridDim[0]
-        row = index - self.gridDim[0] * (index // self.gridDim[0])
+    def explore(self, actions):
+        return random.choice(actions)
 
-        # Check collision with cat
-        if grid[col][row] != 1.0:
-            grid[col][row] = 0.5
+    def optimize(self, state, actions):
+        actionValues = []
 
-        return grid
+        for action in actions:
+            nextGrid = Grid(*self.gridDim, copy.deepcopy(state))
+            nextGrid.createWall(action)
 
-    def checkCollision(self, grid, index):
-        col = index // self.gridDim[0]
-        row = index - self.gridDim[0] * (index // self.gridDim[0])
-
-        # Check collision with another wall or cat
-        if grid[col][row] != 0.0:
-            return True
-
-        return False
-
-    def explore(self, grid, actions):
-        bActions = [action for action in actions if not self.checkCollision(grid, action)]
-        return random.choice(bActions)
-
-    def optimize(self, grid, actions):
-        bActions = [action for action in actions if not self.checkCollision(grid, action)]
-        actionVals = []
-
-        for action in bActions:
-            newGrid = self.createWall(copy.deepcopy(grid), action)
+            newGrid = np.array(nextGrid.grid) / 2  # Standardize grid for neural network
             newGrid = newGrid.reshape(newGrid.shape + (1,))
-            actionVals += [(action, self.valueFunc.predict(np.array([newGrid])))]
 
-        maxVal = max([actionVal[1] for actionVal in actionVals])
-        optActions = [actionVal[0] for actionVal in actionVals if actionVal[1] == maxVal]
+            actionValues += [(action, self.valueFunc.predict(np.array([newGrid])))]
 
-        return self.explore(grid, optActions)
+        maxValue = max([actionValue[1] for actionValue in actionValues])
+        optActions = [actionValue[0] for actionValue in actionValues if actionValue[1] == maxValue]
 
-    def move(self, grid):
-        # Standardize the grid for the neural network
-        grid = np.array(grid) / 2
+        return self.explore(optActions)
+
+    def move(self, state):
+        grid = Grid(*self.gridDim, state)
+        actions = grid.getValidPlayerMoves()
 
         # Update epsilon
         self.updateEpsilon()
-        index = self.explore(grid, self.actions) if random.random() < self.epsilon else self.optimize(grid, self.actions)
+        action = self.explore(actions) if random.random() < self.epsilon else self.optimize(state, actions)
 
-        self.prevStates += [grid]
-        self.prevActions += [index]
+        self.prevStates += [state]
+        self.prevActions += [action]
 
-        return index
+        return action
