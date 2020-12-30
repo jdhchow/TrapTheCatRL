@@ -1,0 +1,6 @@
+*cache*
+*.DS_Store
+*.idea
+*.pyc
+*.pyo
+TrapTheCatRLVenv/*
