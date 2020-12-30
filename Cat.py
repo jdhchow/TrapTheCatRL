@@ -71,4 +71,5 @@ class ShortestPathCat(Cat):
         pass
 
     def move(self, state, catLoc):
-        return sorted([(get_dist(x), x) for x in state.getValidCatMoves()])[0][1]
+        grid = Grid(*self.gridDim, state, catLoc)
+        return sorted([(get_dist(grid, x), x) for x in grid.getValidCatMoves()])[0][1]
