@@ -9,7 +9,6 @@ Python Version: 3.7
 Class for the game
 '''
 
-
 class Game:
     def __init__(self):
         self.grid = None
@@ -50,26 +49,48 @@ class Game:
             offset = '' if col % 2 == 0 else ' '
             print(offset + ' '.join([str(tile) for tile in self.grid[col]]))
 
-    def checkCatWin(self, potentialMoves):
+    def is_winning_position(self, pos):
         # Check if cat is on edge of grid
         for i in range(2):
-            if not {-1, self.gridDim[i]}.isdisjoint([moveTuples[i] for moveTuples in potentialMoves]):
+            if not {0, self.gridDim[i]-1}.isdisjoint([pos[i]]):
                 return True
-
         return False
 
-    def move(self):
-        # List surrounding tiles
-        hardOffset = [(-1, -1), (-1, 0), (0, -1), (0, 1), (1, -1), (1, 0)]
-        potentialMoves = [tuple(sum(joined) for joined in zip(self.catLoc, offset)) for offset in hardOffset]
+    def has_cat_won(self):
+        return self.is_winning_position(self.catLoc)
 
+    def get_valid_moves(self, pos):
+        # These tuples are all (y,x)
+        offsets = [-1 + pos[0] % 2, 0 + pos[0] % 2]
+        hardOffset = [(0, -1), (0, 1)] + [(y, x) for y in [-1, 1] for x in offsets]
+        potentialMoves = [tuple(sum(joined) for joined in zip(pos, offset)) for offset in hardOffset]
+
+        # Remove blocked moves
+        return [moveTuple for moveTuple in potentialMoves if self.grid[moveTuple[0]][moveTuple[1]] != 1]
+
+    def get_dist(self, pos):
+        q = [(pos, 0)]
+        seen = set()
+        while q:
+            curr, dist = q.pop(0)
+            if curr in seen:
+                continue
+            seen.add(curr)
+            if self.is_winning_position(curr):
+                return dist
+            q.extend([(next_, dist+1) for next_ in self.get_valid_moves(curr)])
+
+        # We can't reach the edge anymore :(
+        return 10000
+
+    def move(self):
         # Check win by cat
-        if self.checkCatWin(potentialMoves):
+        if self.has_cat_won():
             self.winner = -1
             return
 
-        # Remove blocked moves
-        potentialMoves = [moveTuple for moveTuple in potentialMoves if self.grid[moveTuple[0]][moveTuple[1]] != 1]
+        potentialMoves = [x[1] for x in sorted([(self.get_dist(x), x) for x in self.get_valid_moves(self.catLoc)])]
+
 
         # Check player win
         if not potentialMoves:

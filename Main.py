@@ -1,4 +1,5 @@
 import datetime
+import random
 from Game import Game
 from Player import Player
 
@@ -20,10 +21,9 @@ if __name__ == '__main__':
     print(str(datetime.datetime.now()) + ': Started')
 
     # Set game conditions
-    gridDim = (5, 5)  # Coordinates given in the form (y, x)
-    initialPercentFill = .6
-    simulations = 100
-    modelPath = 'Model/initialModel.h5'
+    gridDim = (7, 7)  # Coordinates given in the form (y, x)
+    simulations = 5000
+    modelPath = 'Model/shortestCatModel.h5'
     wins = 0
 
     # Initialize game and player
@@ -35,6 +35,8 @@ if __name__ == '__main__':
 
     # Run simulations
     for i in range(1, simulations + 1):
+        initialPercentFill = random.choice([0.1 * i for i in range(1, 8)])
+
         # Create new game
         game.newGame(*gridDim, initialPercentFill)
 
@@ -46,7 +48,8 @@ if __name__ == '__main__':
 
         # Print simulation information
         print('Game ' + str(i))
-        # game.displayGrid()
+        print("====== Beginning state ======")
+        game.displayGrid()
 
         # Process turns
         while game.winner == 1:
@@ -56,6 +59,8 @@ if __name__ == '__main__':
             turns += 1
 
         player.updateValueFunc(game.winner)
+        print("====== Ending state ======")
+        game.displayGrid()
         print('Game winner ' + str(game.winner) + ' in ' + str(turns) + ' turns')
 
         wins = wins + 1 if game.winner == 0 else wins
