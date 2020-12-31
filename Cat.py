@@ -21,7 +21,7 @@ class Cat:
         self.gridDim = None
         self.valueFunc = None
 
-    def newTask(self, gridDim, valueFuncPath=None):
+    def newTask(self, gridDim, valueFuncPath=None, train=True):
         self.gridDim = gridDim
 
     def newGame(self):

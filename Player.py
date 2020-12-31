@@ -26,6 +26,7 @@ class Player:
         self.gridDim = None
         self.valueFunc = None
         self.actions = None
+        self.train = True
 
         # Set for each game
         self.prevActionStates = None
@@ -33,8 +34,9 @@ class Player:
     def updateEpsilon(self):
         self.epsilon = 1 / (1 / self.epsilon + self.epsilonStepSize)
 
-    def newTask(self, gridDim, valueFuncPath=None):
+    def newTask(self, gridDim, valueFuncPath=None, train=True):
         self.gridDim = gridDim
+        self.train = train
 
         if valueFuncPath is None:
             self.valueFunc = self.buildModel(gridDim)
@@ -45,6 +47,9 @@ class Player:
         self.prevActionStates = []
 
     def updateValueFunc(self, terminalReward):
+        if not self.train:
+            return
+
         steps = len(self.prevActionStates)
         discountedRewards = np.array([(self.gamma ** (steps - x)) * terminalReward for x in range(steps)])
 
@@ -99,10 +104,13 @@ class Player:
     def move(self, grid):
         actions = grid.getValidPlayerMoves()
 
-        # Update epsilon
-        self.updateEpsilon()
+        if self.train:
+            # Update epsilon
+            self.updateEpsilon()
 
-        action = self.explore(actions) if random.random() < self.epsilon else self.optimize(grid, actions)
+            action = self.explore(actions) if random.random() < self.epsilon else self.optimize(grid, actions)
+        else:
+            action = self.optimize(grid, actions)
 
         newGrid = grid.createWall(action)
         newGrid = np.array(newGrid) / 2  # Standardize grid for neural network

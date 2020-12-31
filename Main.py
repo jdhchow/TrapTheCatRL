@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     # Set game conditions
     gridDim = (5, 5)  # Coordinates given in the form (y, x)
-    initialPercentFill = .6
+    initialPercentFill = .3
     simulations = 100
     playerModelPath = 'Model/playerModel.h5'
     catModelPath = 'Model/catModel.h5'
@@ -40,8 +40,8 @@ if __name__ == '__main__':
     player = Player()
     cat = ShortestPathCat()
 
-    # Build player and cat models (add playerModelPath to parameters to use existing model)
-    player.newTask(gridDim, playerModelPath)
+    # Build player and cat models
+    player.newTask(gridDim, valueFuncPath=playerModelPath, train=False)
     cat.newTask(gridDim)
 
     # Run simulations
