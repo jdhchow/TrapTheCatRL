@@ -3,7 +3,7 @@ import copy
 
 from Game import Game
 from Player import Player
-from Cat import RandomCat
+from Cat import ShortestPathCat
 
 
 '''
@@ -38,10 +38,10 @@ if __name__ == '__main__':
     # Initialize game, player, and cat
     game = Game(gridDim)
     player = Player()
-    cat = RandomCat()
+    cat = ShortestPathCat()
 
     # Build player and cat models (add playerModelPath to parameters to use existing model)
-    player.newTask(gridDim)
+    player.newTask(gridDim, playerModelPath)
     cat.newTask(gridDim)
 
     # Run simulations

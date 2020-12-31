@@ -28,8 +28,7 @@ class Player:
         self.actions = None
 
         # Set for each game
-        self.prevStates = None
-        self.prevActions = None
+        self.prevActionStates = None
 
     def updateEpsilon(self):
         self.epsilon = 1 / (1 / self.epsilon + self.epsilonStepSize)
@@ -43,19 +42,13 @@ class Player:
             self.valueFunc = keras.models.load_model(valueFuncPath)
 
     def newGame(self):
-        self.prevActions = []
-        self.prevStates = []
+        self.prevActionStates = []
 
     def updateValueFunc(self, terminalReward):
-        steps = len(self.prevStates)
+        steps = len(self.prevActionStates)
         discountedRewards = np.array([(self.gamma ** (steps - x)) * terminalReward for x in range(steps)])
-        actions = []
 
-        for state, action in zip(self.prevStates, self.prevActions):
-            newGrid = state.createWall(action)
-            actions += [np.array(newGrid) / 2]   # Standardize grid for neural network
-
-        actions = np.array(actions)
+        actions = np.array([np.array(actionState) / 2 for actionState in self.prevActionStates])
         actions = actions.reshape(actions.shape + (1,))
 
         self.valueFunc.train_on_batch(actions, discountedRewards)
@@ -108,9 +101,13 @@ class Player:
 
         # Update epsilon
         self.updateEpsilon()
+
         action = self.explore(actions) if random.random() < self.epsilon else self.optimize(grid, actions)
 
-        self.prevStates += [grid]
-        self.prevActions += [action]
+        newGrid = grid.createWall(action)
+        newGrid = np.array(newGrid) / 2  # Standardize grid for neural network
+        newGrid = newGrid.reshape(newGrid.shape + (1,))
+
+        self.prevActionStates += [newGrid]
 
         return action
