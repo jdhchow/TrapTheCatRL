@@ -36,11 +36,11 @@ if __name__ == '__main__':
     # Set game conditions
     gridDim = (5, 5)  # Coordinates given in the form (y, x)
     initialPercentFill = .6
-    simulations = 100
+    simulations = 1000
     playerModelPath = 'Model/playerModel_5x5.h5'
     catModelPath = 'Model/catModel_5x5.h5'
     playerWins = 0
-    train = True
+    train = False
 
     # Initialize game, player, and cat
     game = Game(gridDim)
