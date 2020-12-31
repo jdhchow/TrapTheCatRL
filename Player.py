@@ -87,14 +87,15 @@ class Player:
         return random.choice(actions)
 
     def optimize(self, grid, actions):
-        actionValues = []
+        futures = []
 
         for action in actions:
             newGrid = grid.createWall(action)
             newGrid = np.array(newGrid) / 2  # Standardize grid for neural network
             newGrid = newGrid.reshape(newGrid.shape + (1,))
+            futures += [newGrid]
 
-            actionValues += [(action, self.valueFunc.predict(np.array([newGrid])))]
+        actionValues = [(action, value) for action, value in zip(actions, self.valueFunc.predict(np.array(futures)))]
 
         maxValue = max([actionValue[1] for actionValue in actionValues])
         optActions = [actionValue[0] for actionValue in actionValues if actionValue[1] == maxValue]

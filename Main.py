@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     # Set game conditions
     gridDim = (5, 5)  # Coordinates given in the form (y, x)
-    initialPercentFill = .5
+    initialPercentFill = .6
     simulations = 100
     playerModelPath = 'Model/playerModel_5x5.h5'
     catModelPath = 'Model/catModel_5x5.h5'
@@ -48,8 +48,8 @@ if __name__ == '__main__':
     cat = RLCat()
 
     # Build player and cat models
-    player.newTask(gridDim, valueFuncPath=None, train=train)
-    cat.newTask(gridDim, valueFuncPath=None, train=train)
+    player.newTask(gridDim, valueFuncPath=playerModelPath, train=train)
+    cat.newTask(gridDim, valueFuncPath=catModelPath, train=train)
 
     # Run simulations
     for i in range(1, simulations + 1):

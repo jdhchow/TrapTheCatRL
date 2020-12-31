@@ -122,7 +122,8 @@ class RLCat:
         self.prevActionStates = []
 
     def updateValueFunc(self, terminalReward):
-        if not self.train:
+        # Skip update if in testing mode or if player won prior to any cat actions
+        if not self.train or not self.prevActionStates:
             return
 
         steps = len(self.prevActionStates)
@@ -162,14 +163,15 @@ class RLCat:
         return random.choice(actions)
 
     def optimize(self, grid, actions):
-        actionValues = []
+        futures = []
 
         for action in actions:
             newGrid, _ = grid.updateCatLoc(action)
             newGrid = np.array(newGrid) / 2  # Standardize grid for neural network
             newGrid = newGrid.reshape(newGrid.shape + (1,))
+            futures += [newGrid]
 
-            actionValues += [(action, self.valueFunc.predict(np.array([newGrid])))]
+        actionValues = [(action, value) for action, value in zip(actions,  self.valueFunc.predict(np.array(futures)))]
 
         maxValue = max([actionValue[1] for actionValue in actionValues])
         optActions = [actionValue[0] for actionValue in actionValues if actionValue[1] == maxValue]

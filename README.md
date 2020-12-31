@@ -11,5 +11,5 @@ edge of the board or cannot move.
 
 ### Reinforcement Learning
 The Model/ folder contains some trained models for the player and cat to
-play on a 5x5 grid. There are many opportunities to improve the current
-algorithms and refactor the code.
+play on a 5x5 grid (playerModel_5x5.h5, catModel_5x5.h5). There are many
+opportunities to improve the current algorithms and refactor the code.
