@@ -14,7 +14,7 @@ Python Version: 3.7
 A reinforcement learning algorithm to play Trap the Cat
 
 To Do
-    -Improve rl algorithms to train faster
+    -Improve rl algorithms
     -Code refactoring (assuming cat and player models continue to be similar,
      create rl class that player and cat inherit from)
     -Work on scaling up to 11x11
@@ -40,14 +40,14 @@ if __name__ == '__main__':
     playerModelPath = 'Model/playerModel_5x5.h5'
     catModelPath = 'Model/catModel_5x5.h5'
     playerWins = 0
-    train = False
+    train = False  # Set to False for testing to prevent updating/saving the model
 
     # Initialize game, player, and cat
     game = Game(gridDim)
     player = Player()
     cat = RLCat()
 
-    # Build player and cat models
+    # Build player and cat models (valueFuncPath=None if training from scratch, else load model for training/testing)
     player.newTask(gridDim, valueFuncPath=playerModelPath, train=train)
     cat.newTask(gridDim, valueFuncPath=catModelPath, train=train)
 
