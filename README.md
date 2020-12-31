@@ -10,5 +10,5 @@ empty tile that does not contain the cat. The game ends when the cat reaches the
 edge of the board or cannot move.
 
 ### Reinforcement Learning
-Player.py and Cat.py contain reinforcement learning algorithms for the player
-and cat respectively. Cat.py also contains other deterministic strategies.
+Player.py contains a reinforcement learning algorithm for the player. Cat.py
+has deterministic strategies for the cat.
