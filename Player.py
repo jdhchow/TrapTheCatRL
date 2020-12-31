@@ -112,6 +112,7 @@ class Player:
         else:
             action = self.optimize(grid, actions)
 
+        # Save state that is passed through
         newGrid = grid.createWall(action)
         newGrid = np.array(newGrid) / 2  # Standardize grid for neural network
         newGrid = newGrid.reshape(newGrid.shape + (1,))

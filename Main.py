@@ -3,7 +3,7 @@ import copy
 
 from Game import Game
 from Player import Player
-from Cat import ShortestPathCat
+from Cat import RLCat
 
 
 '''
@@ -12,11 +12,17 @@ Date Created: 2020-12-29
 Python Version: 3.7
 
 A reinforcement learning algorithm to play Trap the Cat
+
+To Do
+    -Improve rl algorithms to train faster
+    -Code refactoring (assuming cat and player models continue to be similar,
+     create rl class that player and cat inherit from)
+    -Work on scaling up to 11x11
 '''
 
 
 def saveFiles(player, playerModelPath, cat, catModelPath):
-    # Save model files if non-determinist strategy being used
+    # Save model files if non-deterministic strategy used
     if player.valueFunc is not None:
         player.valueFunc.save(playerModelPath)
 
@@ -29,20 +35,21 @@ if __name__ == '__main__':
 
     # Set game conditions
     gridDim = (5, 5)  # Coordinates given in the form (y, x)
-    initialPercentFill = .3
+    initialPercentFill = .5
     simulations = 100
-    playerModelPath = 'Model/playerModel.h5'
-    catModelPath = 'Model/catModel.h5'
+    playerModelPath = 'Model/playerModel_5x5.h5'
+    catModelPath = 'Model/catModel_5x5.h5'
     playerWins = 0
+    train = True
 
     # Initialize game, player, and cat
     game = Game(gridDim)
     player = Player()
-    cat = ShortestPathCat()
+    cat = RLCat()
 
     # Build player and cat models
-    player.newTask(gridDim, valueFuncPath=playerModelPath, train=False)
-    cat.newTask(gridDim)
+    player.newTask(gridDim, valueFuncPath=None, train=train)
+    cat.newTask(gridDim, valueFuncPath=None, train=train)
 
     # Run simulations
     for i in range(1, simulations + 1):
@@ -82,6 +89,7 @@ if __name__ == '__main__':
     print('Player win rate: ' + str(float(playerWins) / simulations))
 
     # Save value function
-    saveFiles(player, playerModelPath, cat, catModelPath)
+    if train:
+        saveFiles(player, playerModelPath, cat, catModelPath)
 
     print(str(datetime.datetime.now()) + ': Finished')
