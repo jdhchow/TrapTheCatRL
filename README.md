@@ -9,6 +9,13 @@ prevent the cat from leaving the board. On their turn, they can fill any
 empty tile that does not contain the cat. The game ends when the cat reaches the
 edge of the board or cannot move.
 
+### Reinforcement Learning
+The player and cat know the state that will result from their actions. The
+state-value function is represented by a convolutional neural network.
+First-visit Monte Carlo updates are applied after each game. An epsilon is set
+and decreased during training which acts as a threshold for exploration versus
+optimization.
+
 ### Results
 The Model/ folder contains some trained models for the player and cat on a 5x5
 grid. playerModelSP.py was trained against a cat using a shortest path
