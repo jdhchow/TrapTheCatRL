@@ -11,20 +11,12 @@ edge of the board or cannot move.
 
 ### Reinforcement Learning
 The player and cat know the state that will result from their actions. The
-state-value function is represented by a convolutional neural network.
-First-visit Monte Carlo updates are applied after each game. An epsilon is set
-and decreased during training which acts as a threshold for exploration versus
-optimization.
+state-value function is represented by a convolutional neural network (CNN).
+First-visit Monte Carlo rewards are calculated after each game. After every 100
+games, the state-reward pairs are shuffled and used to train the CNN. An epsilon
+is set and decreased during training which acts as a threshold for exploration
+versus optimization.
 
 ### Results
-The Model/ folder contains some trained models for the player and cat on a 5x5
-grid. playerModelSP.py was trained against a cat using a shortest path
-algorithm. playerModel_5x5.h5 and catModel_5x5.h5 were trained from scratch
-against each other. playerModelSP.py does better than random guessing. It
-performs worse against catModel_5x5.h5 than it does against the shortest path
-algorithm. This implies catModel_5x5.h5 has learned a better technique than
-shortest path.
-
-In future, training on a larger grid would be beneficial to reduce randomness.
 There are many opportunities to improve the current algorithms and refactor the
 code.

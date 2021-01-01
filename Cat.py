@@ -42,9 +42,6 @@ class Cat:
     def newTask(self, gridDim, valueFuncPath=None, train=True):
         raise NotImplementedError
 
-    def newGame(self):
-        raise NotImplementedError
-
     def updateValueFunc(self, terminalReward):
         raise NotImplementedError
 
@@ -57,9 +54,6 @@ class RandomCat(Cat):
         super().__init__()
 
     def newTask(self, gridDim, valueFuncPath=None, train=True):
-        pass
-
-    def newGame(self):
         pass
 
     def updateValueFunc(self, terminalReward):
@@ -77,9 +71,6 @@ class ShortestPathCat(Cat):
         super().__init__()
 
     def newTask(self, gridDim, valueFuncPath=None, train=True):
-        pass
-
-    def newGame(self):
         pass
 
     def updateValueFunc(self, terminalReward):
@@ -104,7 +95,10 @@ class RLCat:
         self.train = True
 
         # Set for each game
-        self.prevActionStates = None
+        self.prevStates = []
+
+        # Set for some window of games
+        self.prevStateRewards = []
 
     def updateEpsilon(self):
         self.epsilon = 1 / (1 / self.epsilon + self.epsilonStepSize)
@@ -118,37 +112,51 @@ class RLCat:
         else:
             self.valueFunc = keras.models.load_model(valueFuncPath)
 
-    def newGame(self):
-        self.prevActionStates = []
-
-    def updateValueFunc(self, terminalReward):
-        # Skip update if in testing mode or if player won prior to any cat actions
-        if not self.train or not self.prevActionStates:
+    def updateValueFunc(self, terminalReward, gameNum):
+        if not self.train:
             return
 
-        steps = len(self.prevActionStates)
-        discountedRewards = np.array([(self.gamma ** (steps - x)) * terminalReward for x in range(steps)])
+        # If game does not end without cat moving
+        if self.prevStates:
+            steps = len(self.prevStates)
+            discountedRewards = [(self.gamma ** (steps - x)) * terminalReward for x in range(steps)]
 
-        actions = np.array([np.array(actionState) / 2 for actionState in self.prevActionStates])
-        actions = actions.reshape(actions.shape + (1,))
+            self.prevStateRewards += [(action, discountedReward) for action, discountedReward in
+                                      zip(self.prevStates, discountedRewards)]
+        self.prevStates = []
 
-        self.valueFunc.train_on_batch(actions, discountedRewards)
+        if gameNum % 100 == 0:
+            random.shuffle(self.prevStateRewards)
+
+            fmtState = np.array([np.array(state) / 2 for state, reward in self.prevStateRewards])
+            fmtState = fmtState.reshape(fmtState.shape + (1,))
+
+            self.valueFunc.train_on_batch(fmtState, np.array([reward for state, reward in self.prevStateRewards]))
+            self.prevStateRewards = []
 
     def buildModel(self, gridDim):
         model = models.Sequential()
 
         model.add(keras.Input(shape=(gridDim + (1,))))
 
-        model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu'))
-        model.add(layers.MaxPooling2D((2, 2)))
-
         model.add(layers.Conv2D(64, (3, 3), padding='same', activation='relu'))
+        model.add(layers.Conv2D(64, (3, 3), padding='same', activation='relu'))
+        model.add(layers.BatchNormalization())
         model.add(layers.MaxPooling2D((2, 2)))
+        model.add(layers.Dropout(0.2))
+
+        model.add(layers.Conv2D(128, (3, 3), padding='same', activation='relu'))
+        model.add(layers.Conv2D(128, (3, 3), padding='same', activation='relu'))
+        model.add(layers.BatchNormalization())
+        model.add(layers.MaxPooling2D((2, 2)))
+        model.add(layers.Dropout(0.2))
 
         model.add(layers.Flatten())
 
+        model.add(layers.Dense(1000, activation='relu'))
+        model.add(layers.Dropout(0.3))
+
         model.add(layers.Dense(500, activation='relu'))
-        model.add(layers.Dense(20, activation='relu'))
         model.add(layers.Dense(1, activation='linear'))
 
         model.summary()
@@ -194,6 +202,6 @@ class RLCat:
         newGrid = np.array(newGrid) / 2  # Standardize grid for neural network
         newGrid = newGrid.reshape(newGrid.shape + (1,))
 
-        self.prevActionStates += [newGrid]
+        self.prevStates += [newGrid]
 
         return action

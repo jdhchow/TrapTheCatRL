@@ -34,13 +34,13 @@ if __name__ == '__main__':
     print(str(datetime.datetime.now()) + ': Started')
 
     # Set game conditions
-    gridDim = (5, 5)  # Coordinates given in the form (y, x)
-    initialPercentFill = .4
+    gridDim = (11, 11)  # Coordinates given in the form (y, x)
+    initialPercentFill = 0.2
     simulations = 1000
-    playerModelPath = 'Model/playerModel_5x5.h5'
-    catModelPath = 'Model/catModel_5x5.h5'
+    playerModelPath = 'Model/playerModel_11x11.h5'
+    catModelPath = 'Model/catModel_11x11.h5'
     playerWins = 0
-    train = False  # Set to False for testing to prevent updating/saving the model
+    train = True  # Set to False for testing to prevent updating/saving the model
 
     # Initialize game, player, and cat
     game = Game(gridDim)
@@ -55,10 +55,6 @@ if __name__ == '__main__':
     for i in range(1, simulations + 1):
         # Create new game
         game.newGame(initialPercentFill)
-
-        # Reset player history
-        player.newGame()
-        cat.newGame()
 
         # Print simulation information
         # game.grid.displayGrid()
@@ -76,8 +72,8 @@ if __name__ == '__main__':
             if game.checkCatWin(): break
 
         # Process end of game updates
-        player.updateValueFunc(-game.winner)
-        cat.updateValueFunc(game.winner - 1)
+        player.updateValueFunc(-game.winner, i)
+        cat.updateValueFunc(game.winner - 1, i)
 
         # Update win rate
         playerWins += 1 if game.winner == 0 else 0
