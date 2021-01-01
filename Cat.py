@@ -42,7 +42,7 @@ class Cat:
     def newTask(self, gridDim, valueFuncPath=None, train=True):
         raise NotImplementedError
 
-    def updateValueFunc(self, terminalReward):
+    def updateValueFunc(self, terminalReward, gameNum):
         raise NotImplementedError
 
     def move(self, grid):
@@ -56,7 +56,7 @@ class RandomCat(Cat):
     def newTask(self, gridDim, valueFuncPath=None, train=True):
         pass
 
-    def updateValueFunc(self, terminalReward):
+    def updateValueFunc(self, terminalReward, gameNum):
         pass
 
     def move(self, grid):
@@ -73,7 +73,7 @@ class ShortestPathCat(Cat):
     def newTask(self, gridDim, valueFuncPath=None, train=True):
         pass
 
-    def updateValueFunc(self, terminalReward):
+    def updateValueFunc(self, terminalReward, gameNum):
         pass
 
     def move(self, grid):

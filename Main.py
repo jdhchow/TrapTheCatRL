@@ -67,6 +67,7 @@ if __name__ == '__main__':
             if game.checkPlayerWin(): break
 
             direction = cat.move(copy.deepcopy(game.grid))
+            print(direction)
             game.moveCat(direction)
 
             if game.checkCatWin(): break
@@ -79,7 +80,8 @@ if __name__ == '__main__':
         playerWins += 1 if game.winner == 0 else 0
 
         # Display summary (0: Player win, 1: Cat win)
-        print('Game ' + str(i) + ' winner is ' + str(game.winner) + ' in ' + str(game.turn) + ' turns')
+        winner = 'cat' if game.winner == 1 else 'player'
+        print('Game ' + str(i) + ' winner is ' + winner + ' in ' + str(game.turn) + ' turns')
 
     # Output simulation summary
     print('Player win rate: ' + str(float(playerWins) / simulations))
