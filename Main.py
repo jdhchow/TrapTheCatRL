@@ -67,7 +67,6 @@ if __name__ == '__main__':
             if game.checkPlayerWin(): break
 
             direction = cat.move(copy.deepcopy(game.grid))
-            print(direction)
             game.moveCat(direction)
 
             if game.checkCatWin(): break

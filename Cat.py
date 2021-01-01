@@ -84,7 +84,7 @@ class RLCat:
     def __init__(self):
         super().__init__()
 
-        self.epsilon = 0.2
+        self.epsilon = 0.5
         self.epsilonStepSize = 0.001
         self.gamma = 0.8
 
