@@ -85,7 +85,7 @@ class RLCat:
         super().__init__()
 
         self.epsilon = 0.9
-        self.epsilonStepSize = 0.001
+        self.epsilonStepSize = 0.0001
         self.gamma = 0.8
 
         # Set for each task

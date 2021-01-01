@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # Set game conditions
     gridDim = (11, 11)  # Coordinates given in the form (y, x)
     initialPercentFill = 0.15
-    simulations = 10000
+    simulations = 50000
     playerModelPath = 'Model/playerModel_11x11.h5'
     catModelPath = 'Model/catModel_11x11.h5'
     playerWins = 0
