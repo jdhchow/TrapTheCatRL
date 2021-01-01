@@ -134,6 +134,9 @@ class RLCat:
             self.valueFunc.train_on_batch(fmtState, np.array([reward for state, reward in self.prevStateRewards]))
             self.prevStateRewards = []
 
+        # Update epsilon
+        self.updateEpsilon()
+
     def buildModel(self, gridDim):
         model = models.Sequential()
 
@@ -190,9 +193,6 @@ class RLCat:
         actions = grid.getValidCatMoves()
 
         if self.train:
-            # Update epsilon
-            self.updateEpsilon()
-
             action = self.explore(actions) if random.random() < self.epsilon else self.optimize(grid, actions)
         else:
             action = self.optimize(grid, actions)

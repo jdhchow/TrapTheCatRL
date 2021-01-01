@@ -35,8 +35,8 @@ if __name__ == '__main__':
 
     # Set game conditions
     gridDim = (11, 11)  # Coordinates given in the form (y, x)
-    initialPercentFill = 0.2
-    simulations = 1000
+    initialPercentFill = 0.15
+    simulations = 10000
     playerModelPath = 'Model/playerModel_11x11.h5'
     catModelPath = 'Model/catModel_11x11.h5'
     playerWins = 0
@@ -82,11 +82,12 @@ if __name__ == '__main__':
         winner = 'cat' if game.winner == 1 else 'player'
         print('Game ' + str(i) + ' winner is ' + winner + ' in ' + str(game.turn) + ' turns')
 
+        # Save value function every 100 games
+        if train and i % 100 == 0:
+            saveFiles(player, playerModelPath, cat, catModelPath)
+            print('Epsilon is: ' + str(player.epsilon))  # In case we want to restart training without resetting threshold
+
     # Output simulation summary
     print('Player win rate: ' + str(float(playerWins) / simulations))
-
-    # Save value function
-    if train:
-        saveFiles(player, playerModelPath, cat, catModelPath)
 
     print(str(datetime.datetime.now()) + ': Finished')
