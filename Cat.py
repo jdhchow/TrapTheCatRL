@@ -72,7 +72,6 @@ class ShortestPathCat(Cat):
         pass
 
     def move(self, grid):
-        print(sorted([(get_dist(grid, x), x) for x in grid.getValidCatMoves()]))
         return sorted([(get_dist(grid, x), x) for x in grid.getValidCatMoves()])[0][1]
 
 class RLCat(RLAgent, Cat):
