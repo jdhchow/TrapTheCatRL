@@ -1,5 +1,6 @@
 import datetime
 import copy
+import numpy as np
 
 from Agent import AgentKind
 from Game import Game
