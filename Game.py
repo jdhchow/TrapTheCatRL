@@ -1,6 +1,7 @@
 import random
 import copy
-
+from enum import Enum
+from Agent import AgentKind
 
 '''
 Author: Jonathan Chow
@@ -9,7 +10,6 @@ Python Version: 3.7
 
 Class for the game
 '''
-
 
 class Grid:
     def __init__(self, yLen, xLen, grid=None, catLoc=None):
@@ -108,15 +108,15 @@ class Game:
         validMoves = self.grid.getValidCatMoves()
 
         if not validMoves:
-            self.winner = 0
+            self.winner = AgentKind.PLAYER
 
-        return self.winner == 0
+        return self.winner == AgentKind.PLAYER
 
     def checkCatWin(self):
         if self.grid.isWinningCatPosition(self.grid.catLoc):
-            self.winner = 1
+            self.winner = AgentKind.CAT
 
-        return self.winner == 1
+        return self.winner == AgentKind.CAT
 
     def movePlayer(self, index):
         # Ensure move is valid (tile index is empty)

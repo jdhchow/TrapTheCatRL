@@ -1,8 +1,9 @@
 import datetime
 import copy
 
+from Agent import AgentKind
 from Game import Game
-from Player import Player
+from Player import RLPlayer
 from Cat import RLCat
 
 
@@ -20,16 +21,6 @@ To Do
     -Work on scaling up to 11x11
 '''
 
-
-def saveFiles(player, playerModelPath, cat, catModelPath):
-    # Save model files if non-deterministic strategy used
-    if player.valueFunc is not None:
-        player.valueFunc.save(playerModelPath)
-
-    if cat.valueFunc is not None:
-        cat.valueFunc.save(catModelPath)
-
-
 if __name__ == '__main__':
     print(str(datetime.datetime.now()) + ': Started')
 
@@ -44,12 +35,8 @@ if __name__ == '__main__':
 
     # Initialize game, player, and cat
     game = Game(gridDim)
-    player = Player()
-    cat = RLCat()
-
-    # Build player and cat models (valueFuncPath=None if training from scratch, else load model for training/testing)
-    player.newTask(gridDim, valueFuncPath=playerModelPath, train=train)
-    cat.newTask(gridDim, valueFuncPath=catModelPath, train=train)
+    player = RLPlayer(gridDim, playerModelPath, train)
+    cat = RLCat(gridDim, playerModelPath, train)
 
     # Run simulations
     for i in range(1, simulations + 1):
@@ -72,20 +59,25 @@ if __name__ == '__main__':
             if game.checkCatWin(): break
 
         # Process end of game updates
-        player.updateValueFunc(-game.winner, i)
-        cat.updateValueFunc(game.winner - 1, i)
+        player.updateValueFunc(-game.winner.value, i)
+        cat.updateValueFunc(game.winner.value - 1, i)
 
         # Update win rate
-        playerWins += 1 if game.winner == 0 else 0
+        playerWins += 1 if game.winner == AgentKind.PLAYER else 0
 
         # Display summary (0: Player win, 1: Cat win)
-        winner = 'cat' if game.winner == 1 else 'player'
+        winner = 'cat' if game.winner == AgentKind.CAT else 'player'
         print('Game ' + str(i) + ' winner is ' + winner + ' in ' + str(game.turn) + ' turns')
 
         # Save value function every 100 games
         if train and i % 100 == 0:
-            saveFiles(player, playerModelPath, cat, catModelPath)
+            player.save()
+            cat.save()
             print('Epsilon is: ' + str(player.epsilon))  # In case we want to restart training without resetting threshold
+
+    if train:
+        player.save()
+        cat.save()
 
     # Output simulation summary
     print('Player win rate: ' + str(float(playerWins) / simulations))
