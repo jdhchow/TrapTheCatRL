@@ -18,8 +18,8 @@ grid.getValidPlayerMoves()
 
 class Player:
     def __init__(self):
-        self.epsilon = 0.9
-        self.epsilonStepSize = 0.0001
+        self.epsilon = 0.5
+        self.epsilonStepSize = 0.001
         self.gamma = 0.8
 
         # Set for each task

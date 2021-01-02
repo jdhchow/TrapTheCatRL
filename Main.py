@@ -1,5 +1,6 @@
 import datetime
 import copy
+import numpy as np
 
 from Game import Game
 from Player import Player
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     simulations = 50000
     playerModelPath = 'Model/playerModel_11x11.h5'
     catModelPath = 'Model/catModel_11x11.h5'
-    playerWins = 0
+    playerWins = []
     train = True  # Set to False for testing to prevent updating/saving the model
 
     # Initialize game, player, and cat
@@ -76,18 +77,16 @@ if __name__ == '__main__':
         cat.updateValueFunc(game.winner - 1, i)
 
         # Update win rate
-        playerWins += 1 if game.winner == 0 else 0
+        playerWins += [-game.winner + 1]
+        if len(playerWins) > 100: playerWins = playerWins[1:]
 
         # Display summary (0: Player win, 1: Cat win)
-        winner = 'cat' if game.winner == 1 else 'player'
-        print('Game ' + str(i) + ' winner is ' + winner + ' in ' + str(game.turn) + ' turns')
+        winner = 'Cat' if game.winner == 1 else 'Player'
+        print('Game ' + str(i) + ' : ' + winner + ' Won : ' + str(game.turn) + ' Turns : Player Win Rate ' + str(np.mean(playerWins)))
 
         # Save value function every 100 games
         if train and i % 100 == 0:
             saveFiles(player, playerModelPath, cat, catModelPath)
             print('Epsilon is: ' + str(player.epsilon))  # In case we want to restart training without resetting threshold
-
-    # Output simulation summary
-    print('Player win rate: ' + str(float(playerWins) / simulations))
 
     print(str(datetime.datetime.now()) + ': Finished')
