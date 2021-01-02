@@ -25,7 +25,7 @@ def get_dist(grid, pos):
         seen.add(curr)
         if grid.isWinningCatPosition(curr):
             return dist
-        q.extend([(next_, dist+1) for next_ in grid.getPotentialCatMoves()])
+        q.extend([(next_, dist+1) for next_ in grid.getValidCatMoves(curr)])
 
     # We can't reach the edge anymore :(
     return 10000
@@ -72,6 +72,7 @@ class ShortestPathCat(Cat):
         pass
 
     def move(self, grid):
+        print(sorted([(get_dist(grid, x), x) for x in grid.getValidCatMoves()]))
         return sorted([(get_dist(grid, x), x) for x in grid.getValidCatMoves()])[0][1]
 
 class RLCat(RLAgent, Cat):

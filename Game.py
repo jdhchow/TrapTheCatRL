@@ -43,13 +43,15 @@ class Grid:
         validActions = [move for move in range(self.totalTiles) if not self.checkCollision(move)]
         return validActions
 
-    def getPotentialCatMoves(self):
-        xOffsets = [-1 + self.catLoc[0] % 2, 0 + self.catLoc[0] % 2]
-        offsets = [(0, -1), (0, 1)] + [(y, x) for y in [-1, 1] for x in xOffsets]
-        return [tuple(sum(joined) for joined in zip(self.catLoc, offset)) for offset in offsets]
+    def getPotentialCatMoves(self, loc=None):
+        if loc is None: loc = self.catLoc
 
-    def getValidCatMoves(self):
-        potentialMoves = self.getPotentialCatMoves()
+        xOffsets = [-1 + loc[0] % 2, 0 + loc[0] % 2]
+        offsets = [(0, -1), (0, 1)] + [(y, x) for y in [-1, 1] for x in xOffsets]
+        return [tuple(sum(joined) for joined in zip(loc, offset)) for offset in offsets]
+
+    def getValidCatMoves(self, loc=None):
+        potentialMoves = self.getPotentialCatMoves(loc)
         return [moveTuple for moveTuple in potentialMoves if self.grid[moveTuple[0]][moveTuple[1]] != 1]
 
     def updateCatLoc(self, move):
@@ -87,6 +89,25 @@ class Grid:
         # Check if cat is on edge of grid
         return not {0, self.yLen - 1}.isdisjoint([pos[0]]) or \
                not {0, self.xLen - 1}.isdisjoint([pos[1]])
+
+    def pathExists(self):
+        q = [self.catLoc]
+        seen = set()
+
+        while q:
+            curr = q.pop(0)
+
+            if curr in seen:
+                continue
+
+            seen.add(curr)
+
+            if self.isWinningCatPosition(curr):
+                return True
+
+            q += [move for move in self.getValidCatMoves(curr)]
+
+        return False
 
 
 class Game:

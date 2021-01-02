@@ -28,9 +28,9 @@ if __name__ == '__main__':
 
     # Set game conditions
     gridDim = (11, 11)  # Coordinates given in the form (y, x)
-    initialPercentFill = 0.3
+    initialPercentFill = 0.12
     simulations = 1000
-    playerModelPath = 'Model/playerModel_11x11_SP.h5'
+    playerModelPath = 'Model/playerModel_11x11.h5'
     catModelPath = 'Model/catModel_11x11.h5'
     playerWinsRolling, playerWins = [], 0
     train = False  # Set to False for testing to prevent updating/saving the model
@@ -38,8 +38,8 @@ if __name__ == '__main__':
     # Initialize game, player, and cat
     game = Game(gridDim)
     player = RLPlayer(gridDim, valueFuncPath=playerModelPath, train=train)
-    # cat = RLCat(gridDim, valueFuncPath=catModelPath, train=train)
-    cat = ShortestPathCat(gridDim, valueFuncPath='', train=train)
+    cat = RLCat(gridDim, valueFuncPath=catModelPath, train=train)
+    # cat = ShortestPathCat(gridDim, valueFuncPath='', train=train)
 
     # Run simulations
     for i in range(1, simulations + 1):
