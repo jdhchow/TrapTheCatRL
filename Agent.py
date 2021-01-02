@@ -45,8 +45,8 @@ class RLAgent(Agent):
     def __init__(self, gridDim, valueFuncPath, train):
         super().__init__(gridDim, valueFuncPath, train)
 
-        self.epsilon = 0.9
-        self.epsilonStepSize = 0.0001
+        self.epsilon = 0.5
+        self.epsilonStepSize = 0.001
         self.gamma = 0.8
 
         # Set for each task
@@ -54,9 +54,6 @@ class RLAgent(Agent):
 
         # Set for each game
         self.prevStates = []
-
-        # Set for some window of games
-        self.prevStateRewards = []
 
         if os.path.exists(valueFuncPath):
             self.valueFunc = keras.models.load_model(valueFuncPath)
@@ -76,20 +73,13 @@ class RLAgent(Agent):
         # If game does not end without cat moving
         if self.prevStates:
             steps = len(self.prevStates)
-            discountedRewards = [(self.gamma ** (steps - x)) * terminalReward for x in range(steps)]
+            discountedRewards = np.array([(self.gamma ** (steps - x)) * terminalReward for x in range(steps)])
 
-            self.prevStateRewards += [(action, discountedReward) for action, discountedReward in
-                                      zip(self.prevStates, discountedRewards)]
-        self.prevStates = []
+            fmtStates = np.array([np.array(state) / 2 for state in self.prevStates])
+            fmtStates = fmtStates.reshape(fmtStates.shape + (1,))
 
-        if gameNum % 100 == 0:
-            random.shuffle(self.prevStateRewards)
-
-            fmtState = np.array([np.array(state) / 2 for state, reward in self.prevStateRewards])
-            fmtState = fmtState.reshape(fmtState.shape + (1,))
-
-            self.valueFunc.train_on_batch(fmtState, np.array([reward for state, reward in self.prevStateRewards]))
-            self.prevStateRewards = []
+            self.valueFunc.train_on_batch(fmtStates, discountedRewards)
+            self.prevStates = []
 
         # Update epsilon
         self.updateEpsilon()
@@ -99,24 +89,16 @@ class RLAgent(Agent):
 
         model.add(keras.Input(shape=(gridDim + (1,))))
 
-        model.add(layers.Conv2D(64, (3, 3), padding='same', activation='relu'))
-        model.add(layers.Conv2D(64, (3, 3), padding='same', activation='relu'))
-        model.add(layers.BatchNormalization())
+        model.add(layers.Conv2D(32, (3, 3), padding='same', activation='relu'))
         model.add(layers.MaxPooling2D((2, 2)))
-        model.add(layers.Dropout(0.2))
 
-        model.add(layers.Conv2D(128, (3, 3), padding='same', activation='relu'))
-        model.add(layers.Conv2D(128, (3, 3), padding='same', activation='relu'))
-        model.add(layers.BatchNormalization())
+        model.add(layers.Conv2D(64, (3, 3), padding='same', activation='relu'))
         model.add(layers.MaxPooling2D((2, 2)))
-        model.add(layers.Dropout(0.2))
 
         model.add(layers.Flatten())
 
-        model.add(layers.Dense(1000, activation='relu'))
-        model.add(layers.Dropout(0.3))
-
         model.add(layers.Dense(500, activation='relu'))
+        model.add(layers.Dense(20, activation='relu'))
         model.add(layers.Dense(1, activation='linear'))
 
         model.summary()

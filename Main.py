@@ -6,6 +6,7 @@ from Agent import AgentKind
 from Game import Game
 from Player import RLPlayer
 from Cat import RLCat
+from Cat import ShortestPathCat
 
 
 '''
@@ -27,17 +28,18 @@ if __name__ == '__main__':
 
     # Set game conditions
     gridDim = (11, 11)  # Coordinates given in the form (y, x)
-    initialPercentFill = 0.15
-    simulations = 50000
-    playerModelPath = 'Model/playerModel_11x11.h5'
+    initialPercentFill = 0.3
+    simulations = 1000
+    playerModelPath = 'Model/playerModel_11x11_SP.h5'
     catModelPath = 'Model/catModel_11x11.h5'
-    playerWins = 0
-    train = True  # Set to False for testing to prevent updating/saving the model
+    playerWinsRolling, playerWins = [], 0
+    train = False  # Set to False for testing to prevent updating/saving the model
 
     # Initialize game, player, and cat
     game = Game(gridDim)
-    player = RLPlayer(gridDim, playerModelPath, train)
-    cat = RLCat(gridDim, playerModelPath, train)
+    player = RLPlayer(gridDim, valueFuncPath=playerModelPath, train=train)
+    # cat = RLCat(gridDim, valueFuncPath=catModelPath, train=train)
+    cat = ShortestPathCat(gridDim, valueFuncPath='', train=train)
 
     # Run simulations
     for i in range(1, simulations + 1):
@@ -64,11 +66,13 @@ if __name__ == '__main__':
         cat.updateValueFunc(game.winner.value - 1, i)
 
         # Update win rate
+        playerWinsRolling += [1 if game.winner == AgentKind.PLAYER else 0]
         playerWins += 1 if game.winner == AgentKind.PLAYER else 0
+        if len(playerWinsRolling) > 100: playerWinsRolling = playerWinsRolling[1:]
 
         # Display summary (0: Player win, 1: Cat win)
         winner = 'cat' if game.winner == AgentKind.CAT else 'player'
-        print('Game ' + str(i) + ' winner is ' + winner + ' in ' + str(game.turn) + ' turns')
+        print('Game ' + str(i) + ' : ' + winner + ' Won : ' + str(game.turn) + ' Turns : Player Win Rate ' + str(np.mean(playerWinsRolling)))
 
         # Save value function every 100 games
         if train and i % 100 == 0:
@@ -76,11 +80,11 @@ if __name__ == '__main__':
             cat.save()
             print('Epsilon is: ' + str(player.epsilon))  # In case we want to restart training without resetting threshold
 
+    # Print cumulative player win rate
+    print('Player Win Rate ' + str(float(playerWins) / simulations))
+
     if train:
         player.save()
         cat.save()
-
-    # Output simulation summary
-    print('Player win rate: ' + str(float(playerWins) / simulations))
 
     print(str(datetime.datetime.now()) + ': Finished')

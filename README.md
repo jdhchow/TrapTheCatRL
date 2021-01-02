@@ -12,11 +12,11 @@ edge of the board or cannot move.
 ### Reinforcement Learning
 The player and cat know the state that will result from their actions. The
 state-value function is represented by a convolutional neural network (CNN).
-First-visit Monte Carlo rewards are calculated after each game. After every 100
-games, the state-reward pairs are shuffled and used to train the CNN. An epsilon
+First-visit Monte Carlo updates are applied after each game. An epsilon
 is set and decreased during training which acts as a threshold for exploration
 versus optimization.
 
 ### Results
-There are many opportunities to improve the current algorithms and refactor the
-code.
+playerModel_11x11_SP.h5 is a model for the player trained against a cat
+following the shortest path algorithm. There are many opportunities to improve
+the current algorithms.

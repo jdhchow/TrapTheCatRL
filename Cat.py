@@ -49,7 +49,7 @@ class RandomCat(Cat):
     def __init__(self, gridDim, valueFuncPath, train):
         super().__init__(gridDim, valueFuncPath, train)
 
-    def newTask(self, gridDim, valueFuncPath=None, train=True):
+    def save(self):
         pass
 
     def updateValueFunc(self, terminalReward, gameNum):
@@ -65,7 +65,7 @@ class ShortestPathCat(Cat):
     def __init__(self, gridDim, valueFuncPath, train):
         super().__init__(gridDim, valueFuncPath, train)
 
-    def newTask(self, gridDim, valueFuncPath=None, train=True):
+    def save(self):
         pass
 
     def updateValueFunc(self, terminalReward, gameNum):
