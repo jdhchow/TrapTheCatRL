@@ -125,10 +125,8 @@ class Game:
         self.grid.newGrid(pFill)
 
     def checkPlayerWin(self):
-        # Check player win (cat has no moves left)
-        validMoves = self.grid.getValidCatMoves()
-
-        if not validMoves:
+        # Check cat has exit
+        if not self.grid.pathExists():
             self.winner = AgentKind.PLAYER
 
         return self.winner == AgentKind.PLAYER
