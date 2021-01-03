@@ -46,7 +46,7 @@ class RLAgent(Agent):
         super().__init__(gridDim, valueFuncPath, train)
 
         self.epsilon = 0.5
-        self.epsilonStepSize = 0.001
+        self.epsilonStepSize = 0.0001
         self.gamma = 0.8
 
         # Set for each task
